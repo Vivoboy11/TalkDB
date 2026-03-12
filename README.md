@@ -1,5 +1,10 @@
 # 🗄️ TalkDB: Natural Language to SQL Interface
 
+**🚀 Live Demo:** [Click here to try TalkDB!](https://talkdb-eztc6sedcdtjy6mxpycwgj.streamlit.app/)
+
+---
+# 🗄️ TalkDB: Natural Language to SQL Interface
+
 TalkDB is an intelligent, full-stack database interface that translates plain English queries into executable SQL statements. Built to bridge the gap between complex relational databases and user-friendly interfaces, this application leverages Large Language Models (LLMs) to dynamically query a local SQLite database and render the results in real-time.
 
 ## ✨ Features
