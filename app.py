@@ -1,17 +1,18 @@
 import streamlit as st
-import os
+import pandas as pd
 import google.generativeai as genai
+import psycopg2
+import os
 from dotenv import load_dotenv
-import database # This imports the database.py file we just wrote!
 
-# 1. Load the secret API key from the .env file
+# Load secrets from .env file
 load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # 2. The System Prompt: Teaching the AI your DBMS Schema
-# The AI needs to know exact table and column names to write valid SQL.
+# Changed "SQLite" to "PostgreSQL" so it writes the exact right SQL dialect.
 SCHEMA_PROMPT = """
-You are an expert SQL translator. Your job is to translate plain English into SQL queries for an SQLite database.
+You are an expert PostgreSQL translator. Your job is to translate plain English into SQL queries for a PostgreSQL database.
 Here is the schema of the database:
 
 Table: Students
@@ -30,7 +31,6 @@ Rules:
 
 def get_sql_from_ai(user_question):
     """Sends the user's question and our schema to Gemini to get a SQL query."""
-    # We use gemini-1.5-flash as it is blazing fast for text translation tasks
     model = genai.GenerativeModel('models/gemini-2.5-flash')
     prompt = SCHEMA_PROMPT + f"\n\nUser Question: {user_question}\nSQL Query:"
     response = model.generate_content(prompt)
@@ -62,19 +62,26 @@ if st.button("Query Database"):
                 if not sql_query.upper().startswith("SELECT"):
                     st.error("Security Alert: Only SELECT queries are allowed!")
                 else:
-                    # Run the query against our SQLite database using the function from database.py
-                    results_df = database.run_query(sql_query)
+                    # NEW POSTGRESQL CONNECTION LOGIC
+                    db_url = os.environ.get("DATABASE_URL")
+                    conn = psycopg2.connect(db_url)
                     
-                    # Display the results
-                    if isinstance(results_df, str): # If our function returned an error string
-                        st.error(results_df)
-                    elif results_df.empty:
-                        st.warning("Query ran successfully, but no results were found.")
-                    else:
-                        st.success("Results fetched successfully!")
-                        st.dataframe(results_df) # Streamlit automatically renders this as a clean table
+                    try:
+                        # pandas can read SQL directly if we give it the connection!
+                        results_df = pd.read_sql_query(sql_query, conn)
+                        
+                        # Display the results
+                        if results_df.empty:
+                            st.warning("Query ran successfully, but no results were found.")
+                        else:
+                            st.success("Results fetched successfully!")
+                            st.dataframe(results_df)
+                    except Exception as db_error:
+                        st.error(f"Database execution error: {db_error}")
+                    finally:
+                        conn.close() # Always close the cloud connection!
+
             except Exception as e:
                 st.error(f"An error occurred: {e}")
     else:
         st.warning("Please enter a question first.")
-        
