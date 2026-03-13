@@ -16,7 +16,8 @@ def run_query(sql_query):
     
     try:
         # Connect to Supabase
-        conn = psycopg2.connect(db_url)
+        # Connect with a timeout to prevent hanging
+        conn = psycopg2.connect(db_url, connect_timeout=10)
         
         # We use pandas here because Streamlit renders DataFrames beautifully
         df = pd.read_sql_query(sql_query, conn)
