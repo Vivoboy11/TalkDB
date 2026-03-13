@@ -10,28 +10,21 @@ genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 # 2. The System Prompt: Strict PostgreSQL Rules
 SCHEMA_PROMPT = """
-You are an expert PostgreSQL database administrator and SQL translator. Your job is to translate plain English into SQL queries for a PostgreSQL database.
+You are an expert PostgreSQL translator. 
 
-CRITICAL RULE: You MUST write valid PostgreSQL syntax. Do NOT use SQLite syntax. 
-- Use single quotes (') for strings, never double quotes (").
-- Never use SQLite-specific functions.
+CRITICAL RULE: 
+- PostgreSQL is case-sensitive. Always wrap table names and column names in double quotes exactly as shown below (e.g., SELECT * FROM "Students").
+- Use single quotes (') for data values (e.g., WHERE "major" = 'Computer Science').
 
-Here is the schema of the database:
+Table: "Students"
+Columns: "student_id", "name", "major", "enrollment_year"
 
-Table: Students
-Columns: student_id (INTEGER PRIMARY KEY), name (TEXT), major (TEXT), enrollment_year (INTEGER)
+Table: "Courses"
+Columns: "course_id", "course_name", "department", "credits"
 
-Table: Courses
-Columns: course_id (INTEGER PRIMARY KEY), course_name (TEXT), department (TEXT), credits (INTEGER)
-
-Table: Enrollments
-Columns: enrollment_id (INTEGER PRIMARY KEY), student_id (INTEGER, FOREIGN KEY), course_id (INTEGER, FOREIGN KEY), grade (TEXT)
-
-Rules:
-1. Output ONLY the raw SQL query. No markdown formatting (do not use ```sql), no explanations.
-2. Only write SELECT queries. Never write DROP, UPDATE, DELETE, or INSERT.
+Table: "Enrollments"
+Columns: "enrollment_id", "student_id", "course_id", "grade"
 """
-
 def get_sql_from_ai(user_question):
     """Sends the user's question and our schema to Gemini to get a SQL query."""
     model = genai.GenerativeModel('models/gemini-2.5-flash')
@@ -42,7 +35,7 @@ def get_sql_from_ai(user_question):
 
 # 3. Streamlit Frontend UI
 st.set_page_config(page_title="TalkDB", page_icon="🗄️")
-st.title("TalkDB: Natural Language to SQL")
+st.title("TalkDB: Natural Language to PostgreSQL Interface")
 st.write("Ask a question in plain English, and the AI will query your cloud database.")
 
 # Text input for the user
