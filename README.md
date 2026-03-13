@@ -1,5 +1,9 @@
 # TalkDB: Natural Language to PostgreSQL 🗄️
 
+**🚀 Try the live app here:** [Click here to use TalkDB](https://talkdb-eztc6sedcdtjy6mxpycwgj.streamlit.app/)
+
+
+
 TalkDB is an AI-powered database interface that allows users to query a university database using plain English. Built with Streamlit and powered by Google's Gemini 2.5 Flash, it seamlessly translates conversational questions into precise, case-sensitive PostgreSQL queries. The app executes these queries against a live Supabase cloud database and returns the results in a clean, interactive data table.
 
 ## ✨ Features
